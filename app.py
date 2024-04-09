@@ -91,7 +91,5 @@ for v in vocab:
         }
     )
 
-
-
 # 關閉 webdriver 物件
 driver.quit()
