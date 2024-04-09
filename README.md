@@ -1,0 +1,2 @@
+# JLPT_VocabularyToDiscord
+ 
