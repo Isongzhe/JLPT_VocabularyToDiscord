@@ -4,8 +4,6 @@ import requests
 import time
 from selenium.webdriver.edge.options import Options
 import requests
-import deepl
-from opencc import OpenCC
 import configparser
 
 config = configparser.ConfigParser()
@@ -13,17 +11,6 @@ config.read('config.ini')
 
 auth_key = config['DEFAULT']['DEEPL_AUTH_KEY']
 DiscordWebhook_url = config['DEFAULT']['DISCORD_WEBHOOK_URL']
-
-def translate_to_chinese(text):
-    translator = deepl.Translator(auth_key)
-
-    result = translator.translate_text(text, target_lang="ZH")
-
-    # 將簡體中文轉換為繁體中文
-    cc = OpenCC('s2t')
-    traditional_chinese = cc.convert(result.text)
-    
-    return traditional_chinese
 
 
 # JLPT Sensei N3 單字列表的 URL
@@ -72,27 +59,36 @@ for word in words[:]:
     kanji = word.find('a', {'class': 'jl-link'}).text
     english = word.find('td', {'class': 'jl-td-vm align-middle'}).text
 
-    # 翻譯英文解釋
-    chinese = translate_to_chinese(english)
+    # # 翻譯英文解釋
+    # chinese = translate_to_chinese(english)
+    chinese = None
 
-    # 將單字添加到 vocab 列表中
-    vocab.append({
+    if chinese == None:
+        vocab.append({
         '漢字': kanji,
         '平假名': hiragana,
-        '中文翻譯': chinese
-    })
+        '英文翻譯': english
+        })
+    else:
+        # 將單字添加到 vocab 列表中
+        vocab.append({
+            '漢字': kanji,
+            '平假名': hiragana,
+            '中文翻譯': chinese
+        })
 
 # 印出前五個單字
 for v in vocab:
     print(v)
     # 將詞彙資訊格式化為一個漂亮的字串
-    vocab_str = '\n'.join(f'{key}: {value}' for key, value in v.items())
-    # 發送訊息到 Discord
-    requests.post(DiscordWebhook_url,
-        json={
-            'content': vocab_str
-        }
-    )
+    vocab_str = '|'.join(f'{key}: {value}' for key, value in v.items())
+    # # 發送訊息到 Discord
+    # requests.post(DiscordWebhook_url,
+    #     json={
+    #         'content': vocab_str
+    #     }
+    # )
 
 # 關閉 webdriver 物件
 driver.quit()
+
