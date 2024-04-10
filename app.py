@@ -6,9 +6,15 @@ from selenium.webdriver.edge.options import Options
 import requests
 import deepl
 from opencc import OpenCC
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+auth_key = config['DEFAULT']['DEEPL_AUTH_KEY']
+DiscordWebhook_url = config['DEFAULT']['DISCORD_WEBHOOK_URL']
 
 def translate_to_chinese(text):
-    auth_key = '7f5065f2-fff4-4068-87bd-e5d4ab57bd9f:fx'  # 你的 DeepL API key
     translator = deepl.Translator(auth_key)
 
     result = translator.translate_text(text, target_lang="ZH")
@@ -22,9 +28,6 @@ def translate_to_chinese(text):
 
 # JLPT Sensei N3 單字列表的 URL
 web_url = 'https://jlptsensei.com/jlpt-n3-vocabulary-list/'
-
-# 你的 Discord Webhook URL
-DiscordWebhook_url = 'https://discord.com/api/webhooks/1227308005834358855/57JuMT04KF0-ispObr4jgGVR2goj58jd2oqQeu-msmu89pn8EGprH5TC-BA3CwMV2qiA'
 
 # 創建一個 Options 物件
 options = Options()
@@ -63,7 +66,7 @@ else:
 vocab = []
 
 # 遍歷前1個單字
-for word in words[:1]:
+for word in words[:]:
     # 從每一個單字中找到單元格
     hiragana = word.find('td', {'class': 'jl-td-vr align-middle'}).text
     kanji = word.find('a', {'class': 'jl-link'}).text
