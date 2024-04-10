@@ -65,8 +65,8 @@ vocab = []
 # 遍歷前1個單字
 for word in words[:1]:
     # 從每一個單字中找到單元格
-    kanji = word.find('td', {'class': 'jl-td-vr align-middle'}).text
-    hiragana = word.find('a', {'class': 'jl-link'}).text
+    hiragana = word.find('td', {'class': 'jl-td-vr align-middle'}).text
+    kanji = word.find('a', {'class': 'jl-link'}).text
     english = word.find('td', {'class': 'jl-td-vm align-middle'}).text
 
     # 翻譯英文解釋
@@ -74,8 +74,8 @@ for word in words[:1]:
 
     # 將單字添加到 vocab 列表中
     vocab.append({
-        '漢字': hiragana,
-        '平假名': kanji,
+        '漢字': kanji,
+        '平假名': hiragana,
         '中文翻譯': chinese
     })
 
