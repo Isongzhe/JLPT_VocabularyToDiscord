@@ -1,9 +1,7 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
-import requests
 import time
 from selenium.webdriver.edge.options import Options
-import requests
 import configparser
 
 config = configparser.ConfigParser()

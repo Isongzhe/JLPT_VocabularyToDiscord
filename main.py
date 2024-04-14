@@ -1,16 +1,21 @@
-from apscheduler.schedulers.blocking import BlockingScheduler
-from app.models.vocab import Vocab
-from app.models.discord_webhook import DiscordNotifier
+# from app.models.manageDB import DatabaseManager
+from app.models.discord_webhook import ArticleSender
 
-def send_word():
-    word = Vocab.get_random_word()
-    message = f"{word.kanji} ({word.hiragana}): {word.chinese}"
-    notifier = DiscordNotifier()
-    notifier.send_message(message)
-    word.delete_instance()
+def main():
+    # Database settings
+    db_settings = {
+        "host": "127.0.0.1",
+        "user": "root",
+        "password": "s91062013",
+        "db": "JLPT",
+        "charset": "utf8"
+    }
+
+    # Create an ArticleSender instance
+    # article_sender = ArticleSender(db_manager, 'N4')
+    # test mode  
+    article_sender = ArticleSender('N4', db_settings, test_mode=True)
+    article_sender.send_article()
 
 if __name__ == "__main__":
-    Vocab.initialize()
-    scheduler = BlockingScheduler()
-    scheduler.add_job(send_word, 'interval', hours=24)
-    scheduler.start()
+    main()
