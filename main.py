@@ -12,7 +12,7 @@ def main():
         "charset": "utf8"
     }
     # 定義等級的順序
-    levels = ['N3', 'N4', 'N5']
+    levels = ['N3', 'N4']
 
     # 檔案路徑
     file_path = r'D:\GitHub\JLPT_VocabularyToDiscord\app\utils\current_level.txt'
