@@ -4,6 +4,7 @@ from selenium.webdriver.edge.options import Options
 import logging
 import time
 import json
+import os
 
 # 創建一個日誌器
 logger = logging.getLogger()
@@ -44,6 +45,11 @@ class Scraper:
     def __init__(self, driver):
         self.driver = driver
         self.data = []
+        self.json_file_path = r'./EasyJapan_news.json'
+        # 如果 JSON 文件存在，則讀取其內容
+        if os.path.exists(self.json_file_path):
+            with open(self.json_file_path, 'r', encoding='utf-8') as f:
+                self.data = json.load(f)
 
     def scrape(self, url):
         soup = self.driver.get_page(url)
@@ -59,18 +65,22 @@ class ScraperNews(Scraper):
         source, time = self.get_source_and_time(a_tag)
 
         if href and img_src and title and source and time:
-            data = {
+            news_data = {
                 'name': title,
                 'webURL': href,
                 'imgURL': img_src,
                 'source': source,
                 'time': time
             }
+            data = {
+                'date': date,
+                'news': [news_data]
+            }
             self.data.append(data)
             logging.info("成功添加新聞資訊")
         else:
             logging.error('缺少數據: href=%s, img_src=%s, title=%s, source=%s, time=%s', href, img_src, title, source, time)
-    
+
     def get_href(self, a_tag):
         href = a_tag.get('href')
         if href is None:
@@ -103,7 +113,7 @@ class ScraperNews(Scraper):
         logging.error('找不到 time_up_div')
         return None, None
         
-    def compare_date(self, soup, date):
+    def get_date(self, soup):
         # 獲取 "nav-link active" 的 a 標籤
         nav_link_active_a = soup.find('a', {'class': 'nav-link active'})
 
@@ -114,32 +124,29 @@ class ScraperNews(Scraper):
 
         # 從 "nav-link active" 的 a 標籤中獲取 span
         nav_link_active_span = nav_link_active_a.find('span')
-        nav_link_active_date = nav_link_active_span.get_text() if nav_link_active_span else None
+        date = nav_link_active_span.get_text() if nav_link_active_span else None
 
-        # 比較日期
-        if date and nav_link_active_date != date:
-            logging.info('日期不匹配: %s != %s', nav_link_active_date, date)
-            return False
+        # # 比較日期
+        # if date and nav_link_active_date != date:
+        #     logging.info('日期不匹配: %s != %s', nav_link_active_date, date)
+        #     return False
 
-        return True
+        return date
     
-    def scrape_date_page(self, date, difficulty, url):
+    def scrape_date_page(self, difficulty, url):
         logging.info(f"現在正在讀取難度為{difficulty}的網站\n網站的URL為:{url}")
         soup = self.driver.get_page(url)
         logging.info("已經成功獲取網頁內容")
         time.sleep(5)
-
-        # 先確認日期是否正確
-        if not self.compare_date(soup, date):
-            logging.error(f"頁面日期不匹配，期望的日期是 {date}")
-            raise ValueError(f"頁面日期不匹配，期望的日期是 {date}")
+        date = self.get_date(soup)
 
         a_tags = soup.find_all('a', {'class': 'item-recent'})
         logging.info(f"找到了 {len(a_tags)} 個 'item-recent' 標籤")
+        
         for a_tag in a_tags:
             self.process_data(a_tag, date)
             if self.data:
-                logging.info(f'新聞標題: {self.data[-1]["name"]}')
+                logging.info(f'新聞標題: {self.data[-1]["news"][-1]["name"]}')
             else:
                 logging.info("未能成功處理新聞資訊")
 
@@ -151,8 +158,12 @@ difficulty = 'easy'  # 或 'normal'
 news_url = f'https://easyjapanese.net/news/{difficulty}/all?hl=zh-TW'
 
 if __name__ == "__main__":
+    # 檢查文件是否存在
+    if os.path.exists(r'./app/utils/EasyJapan_news.json'):
+        # 如果存在，則清空文件
+        open(r'./app/utils/EasyJapan_news.json', 'w').close()
     driver = WebDriver()
     scraper = ScraperNews(driver)
-    scraper.scrape_date_page("Apr 18", "easy", news_url)  # 假設您想要爬取特定日期的新聞
-    scraper.save_data_to_json(r'./EasyJapan_news.json')
+    scraper.scrape_date_page("easy", news_url)  # 假設您想要爬取特定日期的新聞
+    scraper.save_data_to_json(r'./app/utils/EasyJapan_news.json')
     driver.quit()

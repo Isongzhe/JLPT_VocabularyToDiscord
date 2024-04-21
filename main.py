@@ -1,8 +1,12 @@
 # from app.models.manageDB import DatabaseManager
-from app.models.discord_webhook import ArticleSender
+from app.models.discord_webhook import DiscordNotifier, ArticleSender
 import os
+# from app.utils.scaper_news import ScraperNews, WebDriver
+import subprocess
+import json
 
-def main():
+
+def send_grammar_article():
     # Database settings
     db_settings = {
         "host": "127.0.0.1",
@@ -36,11 +40,26 @@ def main():
     with open(file_path, 'w') as file:
         file.write(next_level)
 
-    # Create an ArticleSender instance
-    # article_sender = ArticleSender(db_manager, 'N4')
-    # test mode  
-    # article_sender = ArticleSender('N4', db_settings, test_mode=True)
-    # article_sender.send_article()
+def send_news_article():
+
+    # # 執行 scaper_news.py 檔案
+    # subprocess.run(['python', 'D:/GitHub/JLPT_VocabularyToDiscord/app/utils/scaper_news.py'])
+    
+    # 讀取生成的 JSON 檔案
+    with open('D:/GitHub/JLPT_VocabularyToDiscord/app/utils/EasyJapan_news.json', 'r', encoding='utf-8') as f:
+        news_data = json.load(f)
+        # print(news_data)
+    # 從讀取的資料中取得第一個物件的 date 的值
+    date = news_data[0]['date']
+
+    # print(date)
+    # 建立一個 DiscordNotifier 物件，發送新聞
+    news_notifier = DiscordNotifier('news_URL')
+    news_notifier.send_news(date, news_data)
+
+def main():
+    send_grammar_article()
+    send_news_article()
 
 if __name__ == "__main__":
     main()

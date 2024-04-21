@@ -4,14 +4,12 @@ import configparser
 import re
 
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-#deepl API key
-auth_key = config['DEFAULT']['DEEPL_AUTH_KEY']
-
 def translate_to_chinese(text):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
 
+    #deepl API key
+    auth_key = config['DEFAULT']['DEEPL_AUTH_KEY']
     # 使用 deepl API 來翻譯文本
     translator = deepl.Translator(auth_key)
     result = translator.translate_text(text, target_lang="ZH") #輸入語言自動偵測，翻譯成中文
