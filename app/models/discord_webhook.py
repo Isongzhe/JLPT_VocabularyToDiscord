@@ -48,7 +48,7 @@ class DiscordNotifier:
         for i, news_item in enumerate(news_data, start=1):
             for news in news_item['news']:
                 # 將 name 翻譯為中文
-                name = f"{news['name']}"
+                name = f"{news['name']}".replace('\u3000', '').replace(' ', '')
                 # print(f"Japanese name: {name}")
                 # 將 name 翻譯為中文
                 translated_name = translate_to_chinese(name)
@@ -64,31 +64,23 @@ class DiscordNotifier:
                     "value": value
                 })
 
-        # 將 embed 物件轉換為 JSON 字串
+        # 將 embed 物件轉換為 JSON 字串 (.replace('\n', '').replace(' ', '').replace('\u3000', ''))
         for field in embed["fields"]:
-            field["name"] = field["name"].replace('\n', '').replace(' ', '').replace('\u3000', ' ')
-            field["value"] = field["value"].replace('\n', '').replace(' ', '').replace('\u3000', ' ')
+            field["name"] = field["name"]
+            field["value"] = field["value"]
             # 檢查欄位長度
             if len(field["name"]) > 1024 or len(field["value"]) > 1024:
                 print(f"Field '{field['name']}' or its value is too long.")
 
-        # # 將 embed 物件轉換為 JSON 字串
-        # data = json.dumps({"embeds": [embed]}, ensure_ascii=False)
+        # 將 embed 物件轉換為字典
+        data = {"embeds": [embed]}
 
-        # print("Sending the following data:")
-        # print(data)
-
+        # # 顯示 JSON 字串(發送給 Discord 的資料)
+        # print("發送給 Discord 的資料:")
+        # print(json.dumps(data, ensure_ascii=False, indent=4))  
+        
         headers = {'Content-Type': 'application/json'}
-        try:
-            response = requests.post(self.webhook_url, data=json.dumps({"embeds": [embed]}, ensure_ascii=False), headers=headers)
-            response.raise_for_status()
-            print("Response from Discord:")
-            print(response.text)
-        
-        except requests.exceptions.RequestException as err:
-            print(f"HTTP error occurred: {err}")
-            print(f"Response text: {response.text}")
-        
+        requests.post(self.webhook_url, json=data, headers=headers)
 
 #測試預覽: https://leovoel.github.io/embed-visualizer/
 

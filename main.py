@@ -42,8 +42,8 @@ def send_grammar_article():
 
 def send_news_article():
 
-    # # 執行 scaper_news.py 檔案
-    # subprocess.run(['python', 'D:/GitHub/JLPT_VocabularyToDiscord/app/utils/scaper_news.py'])
+    # 執行 scaper_news.py 檔案
+    subprocess.run(['python', 'D:/GitHub/JLPT_VocabularyToDiscord/app/utils/scaper_news.py'])
     
     # 讀取生成的 JSON 檔案
     with open('D:/GitHub/JLPT_VocabularyToDiscord/app/utils/EasyJapan_news.json', 'r', encoding='utf-8') as f:
